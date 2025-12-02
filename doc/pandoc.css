@@ -1,0 +1,22 @@
+body {
+  max-width: 64%;
+  margin: auto;
+  font-family: 'Noto Sans', sans-serif;
+}
+
+code, pre {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.96em;
+  line-height: 1.4;
+}
+
+dt {
+  font-weight: bold;
+}
+
+@media print {
+  body {
+    max-width: 96%;
+    margin: auto;
+  }
+}
