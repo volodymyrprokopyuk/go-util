@@ -156,6 +156,26 @@ func RandTimeP(a, b time.Time) *time.Time {
   return timeP(RandTime(a, b))
 }
 
+func RandEmail() string {
+  domain := RandFrom("mail.com", "email.com", "gmail.com")
+  email := fmt.Sprintf("%s@%s", RandAbc(8), domain)
+  return strings.ToLower(email)
+}
+
+func RandEmailP() *string {
+  return stringP(RandEmail())
+}
+
+func RandURL() string {
+  domain := RandFrom("com", "org", "net")
+  url := fmt.Sprintf("https://%s.%s/%s", RandStr(8), domain, RandStr(8))
+  return strings.ToLower(url)
+}
+
+func RandURLP() *string {
+  return stringP(RandURL())
+}
+
 func RandIP() string {
   return fmt.Sprintf(
     "%d.%d.%d.%d",
@@ -178,26 +198,6 @@ func RandIPv6() string {
 
 func RandIPv6P() *string {
   return stringP(RandIPv6())
-}
-
-func RandURL() string {
-  domain := RandFrom("com", "org", "net")
-  url := fmt.Sprintf("https://%s.%s/%s", RandStr(8), domain, RandStr(8))
-  return strings.ToLower(url)
-}
-
-func RandURLP() *string {
-  return stringP(RandURL())
-}
-
-func RandEmail() string {
-  domain := RandFrom("mail.com", "email.com", "gmail.com")
-  email := fmt.Sprintf("%s@%s", RandAbc(8), domain)
-  return strings.ToLower(email)
-}
-
-func RandEmailP() *string {
-  return stringP(RandEmail())
 }
 
 func RandIBAN(country string) string {

@@ -1,6 +1,7 @@
 * Go util
 
 - Random values =urand=
+- Check values =ucheck=
 - HTTP client request =ureq=
-- HTTP server handler =uhand=
+- HTTP server handler =userv=
 - JWT and JWKS =ujwt=
