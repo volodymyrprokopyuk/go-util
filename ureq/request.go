@@ -3,13 +3,6 @@ package ureq
 import (
 	"bytes"
 	"context"
-	"crypto"
-	"crypto/hmac"
-	"crypto/rand"
-	"crypto/rsa"
-	"crypto/sha256"
-	"encoding/base64"
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -168,64 +161,6 @@ func ReqBytes(value []byte) requestOption {
 func ResBytes(value *[]byte) requestOption {
   return func(cfg *requestConfig) {
     cfg.resBytes = value
-  }
-}
-
-func HMACSign(key []byte) requestOption {
-  return func(cfg *requestConfig) {
-    ts := time.Now().UTC().Format("2006-01-02T15:04:05.000Z")
-    msg := append([]byte(ts), cfg.reqBytes...)
-    hm := hmac.New(sha256.New, key)
-    hm.Write(msg)
-    sig := hex.EncodeToString(hm.Sum(nil))
-    cfg.header["HMAC-Timestamp"] = ts
-    cfg.header["HMAC-Signature"] = sig
-  }
-}
-
-func jsonBase64(val map[string]any) string {
-  jval, _ := json.Marshal(val)
-  return base64.RawURLEncoding.EncodeToString(jval)
-}
-
-func JWTHS256Sign(key []byte, claims map[string]any) requestOption {
-  return func(cfg *requestConfig) {
-    head := map[string]any{
-      "alg": "HS256",
-      "typ": "JWT",
-    }
-    ehead := jsonBase64(head)
-    eclaims := jsonBase64(claims)
-    msg := fmt.Sprintf("%s.%s", ehead, eclaims)
-    hm := hmac.New(sha256.New, key)
-    hm.Write([]byte(msg))
-    sig := hm.Sum(nil)
-    esig := base64.RawURLEncoding.EncodeToString(sig)
-    tok := fmt.Sprintf("%s.%s", msg, esig)
-    cfg.header[AuthZHeader] = AuthZBearer + tok
-  }
-}
-
-func JWTRS256Sign(prv *rsa.PrivateKey, claims map[string]any) requestOption {
-  return func(cfg *requestConfig) {
-    head := map[string]any{
-      "alg": "RS256",
-      "typ": "JWT",
-    }
-    ehead := jsonBase64(head)
-    eclaims := jsonBase64(claims)
-    msg := fmt.Sprintf("%s.%s", ehead, eclaims)
-    h := sha256.New()
-    h.Write([]byte(msg))
-    hash := h.Sum(nil)
-    sig, err := rsa.SignPKCS1v15(rand.Reader, prv, crypto.SHA256, hash)
-    if err != nil {
-      cfg.err = err
-      return
-    }
-    esig := base64.RawURLEncoding.EncodeToString(sig)
-    tok := fmt.Sprintf("%s.%s", msg, esig)
-    cfg.header[AuthZHeader] = AuthZBearer + tok
   }
 }
 
