@@ -34,6 +34,22 @@ func ReadJSON[T any](data []byte) (*T, error) {
   return &val, nil
 }
 
+func BoolP(b bool) *bool {
+  return &b
+}
+
+func IntP(i int) *int {
+  return &i
+}
+
+func StringP(s string) *string {
+  return &s
+}
+
+func TimeP(t time.Time) *time.Time {
+  return &t
+}
+
 type Client struct {
   client *http.Client
   baseURL string
