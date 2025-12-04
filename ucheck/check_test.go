@@ -132,6 +132,26 @@ func TestCheckIPSuccess(t *testing.T) {
   }
 }
 
+func TestCheckPortSuccess(t *testing.T) {
+  cases := []struct{
+    name string
+    port string
+    valid bool
+  }{
+    {"valid", "12345", true},
+    {"invalid letter", "123x", false},
+    {"invalid range", "123456", false},
+  }
+  for _, c := range cases {
+    t.Run(c.name, func(t *testing.T){
+      valid := ucheck.CheckPort(c.port)
+      if valid != c.valid {
+        t.Errorf("invalid port: %s", c.port)
+      }
+    })
+  }
+}
+
 func TestCheckIBANSuccessFailure(t *testing.T) {
   country := "es"
   for range 2 {

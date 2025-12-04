@@ -25,6 +25,15 @@ const (
   appForm = "application/x-www-form-urlencoded"
 )
 
+func ReadJSON[T any](data []byte) (*T, error) {
+  var val T
+  err := json.Unmarshal(data, &val)
+  if err != nil {
+    return nil, err
+  }
+  return &val, nil
+}
+
 type Client struct {
   client *http.Client
   baseURL string

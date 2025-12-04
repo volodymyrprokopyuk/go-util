@@ -114,10 +114,33 @@ func CheckIP(ip string) bool {
   return reIP.MatchString(ip)
 }
 
+func CheckPort(port string) bool {
+  p, err := strconv.Atoi(port)
+  if err != nil {
+    return false
+  }
+  return p >= 1 && p <= 65535
+}
+
 var reARN = regexp.MustCompile(`^arn:[-:/\w]{30,}$`)
 
 func CheckARN(arn string) bool {
   return reARN.MatchString(arn)
+}
+
+func CheckIDMin(id string, l int) bool {
+  return len(strings.Trim(id, " \n")) >= l
+}
+
+func CheckIDMinPrefix(id string, l int, prefix string) bool {
+  id = strings.Trim(id, " \n")
+  return len(id) >= l && strings.HasPrefix(id, prefix)
+}
+
+var rePostgresURL = regexp.MustCompile(`^postgres://\w+:\w{40,}@\S+:\d{1,5}/\S+$`)
+
+func CheckPostgresURL(url string) bool {
+  return rePostgresURL.MatchString(url)
 }
 
 var reIBAN = regexp.MustCompile(`^[A-Z]{2}\d{2}[A-Z0-9]{11,30}$`)
