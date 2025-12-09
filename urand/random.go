@@ -50,6 +50,12 @@ var (
   )
 )
 
+func RandBytes(l int) []byte {
+  rnd := make([]byte, l)
+  _, _ = rand.Read(rnd)
+  return rnd
+}
+
 func RandAbc(l int) string {
   rnd := make([]byte, l)
   _, _ = rand.Read(rnd)
