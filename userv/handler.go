@@ -51,6 +51,12 @@ func (e NotImplemented) Error() string {
   return string(e)
 }
 
+type BadGateway string // 502
+
+func (e BadGateway) Error() string {
+  return string(e)
+}
+
 type ServiceUnavailable string // 503
 
 func (e ServiceUnavailable) Error() string {
@@ -63,6 +69,7 @@ func errorStatusCode(err error) int {
   var forbidden Forbidden
   var notFound NotFound
   var notImplemented NotImplemented
+  var badGateway BadGateway
   var serviceUnavailable ServiceUnavailable
   switch {
   case errors.As(err, &badRequest):
@@ -75,6 +82,8 @@ func errorStatusCode(err error) int {
     return http.StatusNotFound
   case errors.As(err, &notImplemented):
     return http.StatusNotImplemented
+  case errors.As(err, &badGateway):
+    return http.StatusBadGateway
   case errors.As(err, &serviceUnavailable):
     return http.StatusServiceUnavailable
   default:
