@@ -3,6 +3,7 @@ package ureq
 import (
 	"bytes"
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -17,6 +18,7 @@ import (
 const (
   AuthZHeader = "Authorization"
   AuthZBearer = "Bearer "
+  AuthZBasic = "Basic "
 )
 
 const (
@@ -143,6 +145,14 @@ func Header(key, value string) requestOption {
 func Bearer(tok string) requestOption {
   return func(cfg *requestConfig) {
     cfg.header[AuthZHeader] = AuthZBearer + tok
+  }
+}
+
+func Basic(user, pass string) requestOption {
+  return func(cfg *requestConfig) {
+    cred := fmt.Sprintf("%s:%s", user, pass)
+    basic := base64.StdEncoding.EncodeToString([]byte(cred))
+    cfg.header[AuthZHeader] = AuthZBasic + basic
   }
 }
 
