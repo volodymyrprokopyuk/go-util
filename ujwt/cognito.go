@@ -264,3 +264,13 @@ func JWTDecode(jwt string) (map[string]any, error) {
   }
   return claims, nil
 }
+
+func MakeJWTPass() func(roles [][]string) userv.Middleware {
+  return func(roles [][]string) userv.Middleware {
+    return func(next http.HandlerFunc) http.HandlerFunc {
+      return func(w http.ResponseWriter, r *http.Request) {
+        next(w, r)
+      }
+    }
+  }
+}
