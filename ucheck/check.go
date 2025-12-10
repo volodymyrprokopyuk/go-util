@@ -102,7 +102,7 @@ func CheckEmail(email string) bool {
   return reEmail.MatchString(email)
 }
 
-var reURL = regexp.MustCompile(`^https?://[-\w.:]+/[-\w./%\?=&]*$`)
+var reURL = regexp.MustCompile(`^https?://[-\w.:]+(:?/[-\w./%\?=&]*)?$`)
 
 func CheckURL(url string) bool {
   return reURL.MatchString(url)

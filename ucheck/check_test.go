@@ -115,9 +115,12 @@ func TestCheckEmailSuccess(t *testing.T) {
 }
 
 func TestCheckURLSuccess(t *testing.T) {
-  url := urand.RandURL()
-  if !ucheck.CheckURL(url) {
-    t.Errorf("invalid URL: %s", url)
+  for _, url := range []string{
+    urand.RandURL(), "https://host.domain.org", "https://host.domain.org:1234",
+  } {
+    if !ucheck.CheckURL(url) {
+      t.Errorf("invalid URL: %s", url)
+    }
   }
 }
 
