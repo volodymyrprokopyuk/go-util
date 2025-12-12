@@ -115,29 +115,39 @@ func (c *jwksCache) Key(kid string) (*rsa.PublicKey, bool) {
   return pub, exist
 }
 
+const (
+  TokenUseAccess = "access"
+  TokenUseID = "id"
+)
+
 type jwtHeader struct {
   Alg string `json:"alg"`
   Typ string `json:"typ"`
   Kid string `json:"kid"`
 }
 
-type jwtClaims struct {
+type JWTClaims struct {
+  // Access token
   Iss string `json:"iss"`
-  Use string `json:"token_use"`
+  TokenUse string `json:"token_use"`
   Exp int64 `json:"exp"`
   ClientID string `json:"client_id"`
   Roles []string `json:"cognito:groups"`
+  // ID token
+  Aud string `json:"aud"`
+  Email string `json:"email"`
 }
 
 func jwtClaimsCheck(
-  claims *jwtClaims, issuer string, clientIDs []string, roles [][]string,
+  claims *JWTClaims, issuer, tokenUse string,
+  clientIDs []string, roles [][]string,
 ) error {
   // JWT issuer
   if claims.Iss != issuer {
     return userv.Unautorized("invalid JWT issuer")
   }
   // JWT use
-  if claims.Use != "access" {
+  if claims.TokenUse != tokenUse {
     return userv.Unautorized("invalid JWT use")
   }
   // JWT expiry
@@ -145,8 +155,17 @@ func jwtClaimsCheck(
     return userv.Unautorized("expired JWT")
   }
   // JWT client ID
-  if !slices.Contains(clientIDs, claims.ClientID) {
-    return userv.Unautorized("invalid client ID")
+  switch tokenUse {
+  case TokenUseAccess:
+    if !slices.Contains(clientIDs, claims.ClientID) {
+      return userv.Unautorized("invalid client ID")
+    }
+  case TokenUseID:
+    if !slices.Contains(clientIDs, claims.Aud) {
+      return userv.Unautorized("invalid client ID")
+    }
+  default:
+    return userv.Unautorized("invalid token use")
   }
   // JWT roles [||] && [||]
   for _, query := range roles {
@@ -163,7 +182,7 @@ func jwtClaimsCheck(
 }
 
 func JWTRS256Assert(
-  ctx context.Context, jwt string, jwks *jwksCache, issuer string,
+  ctx context.Context, jwt string, jwks *jwksCache, issuer, tokenUse string,
   clientIDs []string, roles [][]string, // [||] && [||]
 ) error {
   // Parse JWT
@@ -216,15 +235,15 @@ func JWTRS256Assert(
   if err != nil {
     return userv.Unautorized("invalid JWT claims encoding")
   }
-  var claims jwtClaims
+  var claims JWTClaims
   err = json.Unmarshal(jclaims, &claims)
   if err != nil {
     return userv.Unautorized("invalid JWT claims format")
   }
-  return jwtClaimsCheck(&claims, issuer, clientIDs, roles)
+  return jwtClaimsCheck(&claims, issuer, tokenUse, clientIDs, roles)
 }
 
-func JWTDecodeClaims(jwt string) (*jwtClaims, error) {
+func JWTDecodeClaims(jwt string) (*JWTClaims, error) {
   parts := strings.Split(jwt, ".")
   if len(parts) != 3 {
     return nil, errors.New("invalid JWT format")
@@ -233,7 +252,7 @@ func JWTDecodeClaims(jwt string) (*jwtClaims, error) {
   if err != nil {
     return nil, err
   }
-  var claims jwtClaims
+  var claims JWTClaims
   err = json.Unmarshal([]byte(jstr), &claims)
   if err != nil {
     return nil, err
