@@ -112,6 +112,34 @@ type resError struct {
   Error string `json:"error"`
 }
 
+func SetSecureCookie(
+  w http.ResponseWriter, name, value string, maxAge time.Duration,
+) {
+  http.SetCookie(w, &http.Cookie{
+    Name: name,
+    Value: value,
+    Path: "/",
+    HttpOnly: true,
+    Secure: true,
+    SameSite: http.SameSiteLaxMode,
+    MaxAge: int(maxAge.Seconds()),
+    Expires: time.Now().UTC().Add(maxAge),
+  })
+}
+
+func ClearSecureCookie(w http.ResponseWriter, name string) {
+  http.SetCookie(w, &http.Cookie{
+    Name: name,
+    Value: "",
+    Path: "/",
+    HttpOnly: true,
+    Secure: true,
+    SameSite: http.SameSiteLaxMode,
+    MaxAge: -1,
+    Expires: time.Unix(0, 0),
+  })
+}
+
 func WriteResponse(w http.ResponseWriter, statusCode int, res any) {
   w.Header().Set("Content-Type", "application/json")
   w.WriteHeader(statusCode)
