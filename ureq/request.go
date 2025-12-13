@@ -170,17 +170,6 @@ func SetSecureCookie(
   })
 }
 
-func SecureCookie(r *http.Request, name string) (string, error) {
-  cookie, err := r.Cookie(name)
-  if err != nil {
-    return "", err
-  }
-  if len(cookie.Value) == 0 {
-    return "", fmt.Errorf("empty cookie %s", name)
-  }
-  return cookie.Value, nil
-}
-
 func ClearSecureCookie(w http.ResponseWriter, name string) {
   http.SetCookie(w, &http.Cookie{
     Name: name,
