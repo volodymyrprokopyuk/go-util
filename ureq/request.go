@@ -156,6 +156,44 @@ func Basic(user, pass string) requestOption {
   }
 }
 
+func SetSecureCookie(
+  w http.ResponseWriter, name, value string, expiry time.Time,
+) {
+  http.SetCookie(w, &http.Cookie{
+    Name: name,
+    Value: value,
+    Path: "/",
+    HttpOnly: true,
+    Secure: true,
+    SameSite: http.SameSiteLaxMode,
+    Expires: expiry,
+  })
+}
+
+func SecureCookie(r *http.Request, name string) (string, error) {
+  cookie, err := r.Cookie(name)
+  if err != nil {
+    return "", err
+  }
+  if len(cookie.Value) == 0 {
+    return "", fmt.Errorf("empty cookie %s", name)
+  }
+  return cookie.Value, nil
+}
+
+func ClearSecureCookie(w http.ResponseWriter, name string) {
+  http.SetCookie(w, &http.Cookie{
+    Name: name,
+    Value: "",
+    Path: "/",
+    HttpOnly: true,
+    Secure: true,
+    SameSite: http.SameSiteLaxMode,
+    Expires: time.Unix(0, 0),
+    MaxAge: -1,
+  })
+}
+
 func FormValues(form url.Values) requestOption {
   return func(cfg *requestConfig) {
     cfg.reqBytes = []byte(form.Encode())
