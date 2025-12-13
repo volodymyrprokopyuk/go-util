@@ -34,14 +34,14 @@ type jwkst struct {
   Keys []*jwkt `json:"keys"`
 }
 
-type jwksCache struct {
+type JWKS struct {
   httpc *ureq.Client
   mtx sync.RWMutex
   keys map[string]*rsa.PublicKey
 }
 
-func NewJWKS(httpc *ureq.Client) *jwksCache {
-  return &jwksCache{
+func NewJWKS(httpc *ureq.Client) *JWKS {
+  return &JWKS{
     httpc: httpc,
     keys: make(map[string]*rsa.PublicKey),
   }
@@ -74,7 +74,7 @@ func jwkToRSA(jwk *jwkt) (*rsa.PublicKey, error) {
   return pub, nil
 }
 
-func (c *jwksCache) Fetch(ctx context.Context) error {
+func (c *JWKS) Fetch(ctx context.Context) error {
   var jwks jwkst
   res, err := c.httpc.GET(
     ctx, ureq.URL("/.well-known/jwks.json"), ureq.ResJSON(&jwks),
@@ -108,7 +108,7 @@ func (c *jwksCache) Fetch(ctx context.Context) error {
   return nil
 }
 
-func (c *jwksCache) Key(kid string) (*rsa.PublicKey, bool) {
+func (c *JWKS) Key(kid string) (*rsa.PublicKey, bool) {
   c.mtx.RLock()
   defer c.mtx.RUnlock()
   pub, exist := c.keys[kid]
@@ -182,7 +182,7 @@ func jwtClaimsCheck(
 }
 
 func JWTRS256Assert(
-  ctx context.Context, jwt string, jwks *jwksCache, issuer, tokenUse string,
+  ctx context.Context, jwt string, jwks *JWKS, issuer, tokenUse string,
   clientIDs []string, roles [][]string, // [||] && [||]
 ) error {
   // Parse JWT
